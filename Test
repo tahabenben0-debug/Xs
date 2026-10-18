@@ -1,0 +1,79 @@
+--[[
+    BEN HUB - ESP
+    Roblox Studio
+    Player Boxes + Names + Distance
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local ESP_COLOR = Color3.fromRGB(0, 255, 100)
+local SHOW_NAMES = true
+local SHOW_DISTANCE = true
+
+local ESPObjects = {}
+
+local function RemoveESP(player)
+    if ESPObjects[player] then
+        ESPObjects[player]:Destroy()
+        ESPObjects[player] = nil
+    end
+end
+
+local function CreateESP(player)
+    if player == LocalPlayer then
+        return
+    end
+
+    RemoveESP(player)
+
+    local character = player.Character
+    if not character then
+        return
+    end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "BEN_HUB_ESP"
+    highlight.Adornee = character
+    highlight.FillColor = ESP_COLOR
+    highlight.OutlineColor = ESP_COLOR
+    highlight.FillTransparency = 0.75
+    highlight.OutlineTransparency = 0
+    highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+    highlight.Parent = character
+
+    ESPObjects[player] = highlight
+end
+
+local function SetupPlayer(player)
+    if player == LocalPlayer then
+        return
+    end
+
+    if player.Character then
+        CreateESP(player)
+    end
+
+    player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        CreateESP(player)
+    end)
+
+    player.CharacterRemoving:Connect(function()
+        RemoveESP(player)
+    end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    SetupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(SetupPlayer)
+
+Players.PlayerRemoving:Connect(function(player)
+    RemoveESP(player)
+end)
+
+print("BEN HUB ESP loaded successfully!")
